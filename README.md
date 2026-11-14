@@ -17,6 +17,20 @@ The planted bug: `cancelOrder` no longer voids the order's issued invoice. It br
 
 **The short version:** only the model checkers verified the spec itself. Neither IntentLang's nor Allium's own tooling noticed the bug. Those two languages are better at saying things (actors, surfaces, lifecycles); Quint and Alloy are the ones that check things.
 
+## The four tools
+
+| Tool | What it is | Made by | Version used | Checks invariants |
+|---|---|---|---|---|
+| [Quint](https://quint-lang.org) | An executable specification language based on TLA+, with TypeScript-like syntax. Ships a simulator and hands off to the TLC and Apalache model checkers. | Informal Systems | 0.33.1 | Yes, exhaustively |
+| [Alloy](https://alloytools.org) | A relational modeling language: everything is sets and relations, analyzed by a bounded SAT-based solver. Version 6 added mutable state and temporal logic. | Daniel Jackson's group at MIT | 6.2.0 | Yes, within bounds |
+| [Allium](https://juxt.github.io/allium/) | A behavioural specification language written for LLM coding agents: entities, rules, actors, surfaces, lifecycles. No runtime; a CLI validates structure and plans tests. | JUXT | CLI 3.6.1, language 3 | No |
+| [IntentLang](https://krakenhavoc.github.io/IntentLang/) | A contract-style specification language for human and AI collaboration: entities, actions with `requires` / `ensures`, invariants, state machines. Has code generation and a spec-level test runner. | krakenhavoc (GitHub account) | 0.7.0-beta.1, built from source | No |
+
+- **Quint** was the strongest here. It was the only tool that both read reasonably and verified the spec, and the only one whose traces could drive the conformance tests directly. Its weak spot is that actors and side effects are conventions, not language constructs.
+- **Alloy** did what it promises, but it suits structure-heavy models. For this workflow-shaped problem it was slower than Quint, its result was bounded, and its command-line output is hard to read without the GUI.
+- **Allium** was the most expressive and the most pleasant to read, and its CLI installed and behaved as documented. It checks lifecycle structure and nothing deeper, so it needs a checker underneath.
+- **IntentLang** reads well and its contracts translate cleanly into a checkable model. Its tooling was the least mature: the published release rejects the project's own example, the test runner ignores quantified effects, and `verify` does not verify invariants.
+
 ## The domain
 
 - **Order:** Draft → Confirmed → Fulfilled, or Cancelled from Draft or Confirmed.
