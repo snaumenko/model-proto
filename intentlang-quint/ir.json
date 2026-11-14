@@ -1,0 +1,1966 @@
+{
+  "name": "Orders",
+  "structs": [
+    {
+      "name": "Order",
+      "fields": [
+        {
+          "name": "id",
+          "ty": {
+            "Named": "UUID"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Order",
+            "part": "field:id",
+            "span": {
+              "start": 390,
+              "end": 401
+            }
+          }
+        },
+        {
+          "name": "status",
+          "ty": {
+            "Named": "OrderStatus"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Order",
+            "part": "field:status",
+            "span": {
+              "start": 401,
+              "end": 421
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "Order",
+        "part": "entity",
+        "span": {
+          "start": 373,
+          "end": 422
+        }
+      }
+    },
+    {
+      "name": "Invoice",
+      "fields": [
+        {
+          "name": "id",
+          "ty": {
+            "Named": "UUID"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Invoice",
+            "part": "field:id",
+            "span": {
+              "start": 443,
+              "end": 454
+            }
+          }
+        },
+        {
+          "name": "order",
+          "ty": {
+            "Named": "Order"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Invoice",
+            "part": "field:order",
+            "span": {
+              "start": 454,
+              "end": 469
+            }
+          }
+        },
+        {
+          "name": "status",
+          "ty": {
+            "Named": "InvoiceStatus"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Invoice",
+            "part": "field:status",
+            "span": {
+              "start": 469,
+              "end": 491
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "Invoice",
+        "part": "entity",
+        "span": {
+          "start": 424,
+          "end": 492
+        }
+      }
+    },
+    {
+      "name": "Notice",
+      "fields": [
+        {
+          "name": "kind",
+          "ty": {
+            "Union": [
+              "InvoiceEmail",
+              "Receipt"
+            ]
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Notice",
+            "part": "field:kind",
+            "span": {
+              "start": 561,
+              "end": 592
+            }
+          }
+        },
+        {
+          "name": "invoice",
+          "ty": {
+            "Named": "Invoice"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "Notice",
+            "part": "field:invoice",
+            "span": {
+              "start": 592,
+              "end": 609
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "Notice",
+        "part": "entity",
+        "span": {
+          "start": 494,
+          "end": 610
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "CreateOrder",
+      "params": [
+        {
+          "name": "id",
+          "ty": {
+            "Named": "UUID"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CreateOrder",
+            "part": "param:id",
+            "span": {
+              "start": 681,
+              "end": 693
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Not": {
+              "Exists": {
+                "binding": "o",
+                "ty": "Order",
+                "body": {
+                  "Compare": {
+                    "left": {
+                      "FieldAccess": {
+                        "root": {
+                          "Var": "o"
+                        },
+                        "field": "id"
+                      }
+                    },
+                    "op": "Eq",
+                    "right": {
+                      "Var": "id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CreateOrder",
+            "part": "requires",
+            "span": {
+              "start": 708,
+              "end": 743
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Exists": {
+                "binding": "o",
+                "ty": "Order",
+                "body": {
+                  "And": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "o"
+                            },
+                            "field": "id"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "id"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "o"
+                            },
+                            "field": "status"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "Draft"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "CreateOrder",
+              "part": "ensures",
+              "span": {
+                "start": 762,
+                "end": 815
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "customer"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CreateOrder",
+            "part": "property:requires_role",
+            "span": {
+              "start": 837,
+              "end": 862
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "CreateOrder",
+        "part": "action",
+        "span": {
+          "start": 612,
+          "end": 868
+        }
+      }
+    },
+    {
+      "name": "ConfirmOrder",
+      "params": [
+        {
+          "name": "order",
+          "ty": {
+            "Named": "Order"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "ConfirmOrder",
+            "part": "param:order",
+            "span": {
+              "start": 937,
+              "end": 953
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Compare": {
+              "left": {
+                "FieldAccess": {
+                  "root": {
+                    "Var": "order"
+                  },
+                  "field": "status"
+                }
+              },
+              "op": "Eq",
+              "right": {
+                "Var": "Draft"
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "ConfirmOrder",
+            "part": "requires",
+            "span": {
+              "start": 968,
+              "end": 992
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Compare": {
+                "left": {
+                  "FieldAccess": {
+                    "root": {
+                      "Var": "order"
+                    },
+                    "field": "status"
+                  }
+                },
+                "op": "Eq",
+                "right": {
+                  "Var": "Confirmed"
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "ConfirmOrder",
+              "part": "ensures",
+              "span": {
+                "start": 1011,
+                "end": 1039
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "customer"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "ConfirmOrder",
+            "part": "property:requires_role",
+            "span": {
+              "start": 1061,
+              "end": 1086
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "ConfirmOrder",
+        "part": "action",
+        "span": {
+          "start": 870,
+          "end": 1092
+        }
+      }
+    },
+    {
+      "name": "IssueInvoice",
+      "params": [
+        {
+          "name": "order",
+          "ty": {
+            "Named": "Order"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "IssueInvoice",
+            "part": "param:order",
+            "span": {
+              "start": 1233,
+              "end": 1249
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Compare": {
+              "left": {
+                "FieldAccess": {
+                  "root": {
+                    "Var": "order"
+                  },
+                  "field": "status"
+                }
+              },
+              "op": "Eq",
+              "right": {
+                "Var": "Confirmed"
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "IssueInvoice",
+            "part": "requires",
+            "span": {
+              "start": 1264,
+              "end": 1294
+            }
+          }
+        },
+        {
+          "expr": {
+            "Not": {
+              "Exists": {
+                "binding": "i",
+                "ty": "Invoice",
+                "body": {
+                  "And": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "order"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "order"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "status"
+                          }
+                        },
+                        "op": "Ne",
+                        "right": {
+                          "Var": "Void"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "IssueInvoice",
+            "part": "requires",
+            "span": {
+              "start": 1294,
+              "end": 1357
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Exists": {
+                "binding": "i",
+                "ty": "Invoice",
+                "body": {
+                  "And": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "order"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "order"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "status"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "Issued"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "IssueInvoice",
+              "part": "ensures",
+              "span": {
+                "start": 1376,
+                "end": 1440
+              }
+            }
+          }
+        },
+        {
+          "Always": {
+            "expr": {
+              "Exists": {
+                "binding": "n",
+                "ty": "Notice",
+                "body": {
+                  "And": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "n"
+                            },
+                            "field": "kind"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "InvoiceEmail"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "FieldAccess": {
+                                "root": {
+                                  "Var": "n"
+                                },
+                                "field": "invoice"
+                              }
+                            },
+                            "field": "order"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "order"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "IssueInvoice",
+              "part": "ensures",
+              "span": {
+                "start": 1440,
+                "end": 1513
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "system"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "IssueInvoice",
+            "part": "property:requires_role",
+            "span": {
+              "start": 1535,
+              "end": 1558
+            }
+          }
+        },
+        {
+          "key": "audit_logged",
+          "value": {
+            "Bool": true
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "IssueInvoice",
+            "part": "property:audit_logged",
+            "span": {
+              "start": 1563,
+              "end": 1581
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "IssueInvoice",
+        "part": "action",
+        "span": {
+          "start": 1094,
+          "end": 1587
+        }
+      }
+    },
+    {
+      "name": "VoidInvoice",
+      "params": [
+        {
+          "name": "invoice",
+          "ty": {
+            "Named": "Invoice"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "VoidInvoice",
+            "part": "param:invoice",
+            "span": {
+              "start": 1677,
+              "end": 1697
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Compare": {
+              "left": {
+                "FieldAccess": {
+                  "root": {
+                    "Var": "invoice"
+                  },
+                  "field": "status"
+                }
+              },
+              "op": "Eq",
+              "right": {
+                "Var": "Issued"
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "VoidInvoice",
+            "part": "requires",
+            "span": {
+              "start": 1712,
+              "end": 1739
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Compare": {
+                "left": {
+                  "FieldAccess": {
+                    "root": {
+                      "Var": "invoice"
+                    },
+                    "field": "status"
+                  }
+                },
+                "op": "Eq",
+                "right": {
+                  "Var": "Void"
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "VoidInvoice",
+              "part": "ensures",
+              "span": {
+                "start": 1758,
+                "end": 1783
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "staff"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "VoidInvoice",
+            "part": "property:requires_role",
+            "span": {
+              "start": 1805,
+              "end": 1827
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "VoidInvoice",
+        "part": "action",
+        "span": {
+          "start": 1589,
+          "end": 1833
+        }
+      }
+    },
+    {
+      "name": "PayInvoice",
+      "params": [
+        {
+          "name": "invoice",
+          "ty": {
+            "Named": "Invoice"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "PayInvoice",
+            "part": "param:invoice",
+            "span": {
+              "start": 1922,
+              "end": 1942
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Compare": {
+              "left": {
+                "FieldAccess": {
+                  "root": {
+                    "Var": "invoice"
+                  },
+                  "field": "status"
+                }
+              },
+              "op": "Eq",
+              "right": {
+                "Var": "Issued"
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "PayInvoice",
+            "part": "requires",
+            "span": {
+              "start": 1957,
+              "end": 1984
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Compare": {
+                "left": {
+                  "FieldAccess": {
+                    "root": {
+                      "Var": "invoice"
+                    },
+                    "field": "status"
+                  }
+                },
+                "op": "Eq",
+                "right": {
+                  "Var": "Paid"
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "PayInvoice",
+              "part": "ensures",
+              "span": {
+                "start": 2003,
+                "end": 2030
+              }
+            }
+          }
+        },
+        {
+          "Always": {
+            "expr": {
+              "Exists": {
+                "binding": "n",
+                "ty": "Notice",
+                "body": {
+                  "And": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "n"
+                            },
+                            "field": "kind"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "Receipt"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "n"
+                            },
+                            "field": "invoice"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "invoice"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "PayInvoice",
+              "part": "ensures",
+              "span": {
+                "start": 2030,
+                "end": 2094
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "customer"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "PayInvoice",
+            "part": "property:requires_role",
+            "span": {
+              "start": 2116,
+              "end": 2141
+            }
+          }
+        },
+        {
+          "key": "idempotent",
+          "value": {
+            "Bool": true
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "PayInvoice",
+            "part": "property:idempotent",
+            "span": {
+              "start": 2146,
+              "end": 2162
+            }
+          }
+        },
+        {
+          "key": "audit_logged",
+          "value": {
+            "Bool": true
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "PayInvoice",
+            "part": "property:audit_logged",
+            "span": {
+              "start": 2167,
+              "end": 2185
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "PayInvoice",
+        "part": "action",
+        "span": {
+          "start": 1835,
+          "end": 2191
+        }
+      }
+    },
+    {
+      "name": "FulfilOrder",
+      "params": [
+        {
+          "name": "order",
+          "ty": {
+            "Named": "Order"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "FulfilOrder",
+            "part": "param:order",
+            "span": {
+              "start": 2270,
+              "end": 2286
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Compare": {
+              "left": {
+                "FieldAccess": {
+                  "root": {
+                    "Var": "order"
+                  },
+                  "field": "status"
+                }
+              },
+              "op": "Eq",
+              "right": {
+                "Var": "Confirmed"
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "FulfilOrder",
+            "part": "requires",
+            "span": {
+              "start": 2301,
+              "end": 2331
+            }
+          }
+        },
+        {
+          "expr": {
+            "Exists": {
+              "binding": "i",
+              "ty": "Invoice",
+              "body": {
+                "And": [
+                  {
+                    "Compare": {
+                      "left": {
+                        "FieldAccess": {
+                          "root": {
+                            "Var": "i"
+                          },
+                          "field": "order"
+                        }
+                      },
+                      "op": "Eq",
+                      "right": {
+                        "Var": "order"
+                      }
+                    }
+                  },
+                  {
+                    "Compare": {
+                      "left": {
+                        "FieldAccess": {
+                          "root": {
+                            "Var": "i"
+                          },
+                          "field": "status"
+                        }
+                      },
+                      "op": "Eq",
+                      "right": {
+                        "Var": "Paid"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "FulfilOrder",
+            "part": "requires",
+            "span": {
+              "start": 2331,
+              "end": 2391
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Compare": {
+                "left": {
+                  "FieldAccess": {
+                    "root": {
+                      "Var": "order"
+                    },
+                    "field": "status"
+                  }
+                },
+                "op": "Eq",
+                "right": {
+                  "Var": "Fulfilled"
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "FulfilOrder",
+              "part": "ensures",
+              "span": {
+                "start": 2410,
+                "end": 2438
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "staff"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "FulfilOrder",
+            "part": "property:requires_role",
+            "span": {
+              "start": 2460,
+              "end": 2482
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "FulfilOrder",
+        "part": "action",
+        "span": {
+          "start": 2193,
+          "end": 2488
+        }
+      }
+    },
+    {
+      "name": "CancelOrder",
+      "params": [
+        {
+          "name": "order",
+          "ty": {
+            "Named": "Order"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CancelOrder",
+            "part": "param:order",
+            "span": {
+              "start": 2648,
+              "end": 2663
+            }
+          }
+        },
+        {
+          "name": "invoice",
+          "ty": {
+            "Optional": {
+              "Named": "Invoice"
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CancelOrder",
+            "part": "param:invoice",
+            "span": {
+              "start": 2663,
+              "end": 2680
+            }
+          }
+        }
+      ],
+      "preconditions": [
+        {
+          "expr": {
+            "Or": [
+              {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "Var": "order"
+                      },
+                      "field": "status"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "Var": "Draft"
+                  }
+                }
+              },
+              {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "Var": "order"
+                      },
+                      "field": "status"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "Var": "Confirmed"
+                  }
+                }
+              }
+            ]
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CancelOrder",
+            "part": "requires",
+            "span": {
+              "start": 2699,
+              "end": 2754
+            }
+          }
+        },
+        {
+          "expr": {
+            "Not": {
+              "Exists": {
+                "binding": "i",
+                "ty": "Invoice",
+                "body": {
+                  "And": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "order"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "order"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "status"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "Paid"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CancelOrder",
+            "part": "requires",
+            "span": {
+              "start": 2754,
+              "end": 2817
+            }
+          }
+        }
+      ],
+      "postconditions": [
+        {
+          "Always": {
+            "expr": {
+              "Compare": {
+                "left": {
+                  "FieldAccess": {
+                    "root": {
+                      "Var": "order"
+                    },
+                    "field": "status"
+                  }
+                },
+                "op": "Eq",
+                "right": {
+                  "Var": "Cancelled"
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "CancelOrder",
+              "part": "ensures",
+              "span": {
+                "start": 2836,
+                "end": 2866
+              }
+            }
+          }
+        },
+        {
+          "When": {
+            "guard": {
+              "Compare": {
+                "left": {
+                  "Var": "invoice"
+                },
+                "op": "Ne",
+                "right": {
+                  "Literal": "Null"
+                }
+              }
+            },
+            "expr": {
+              "Compare": {
+                "left": {
+                  "FieldAccess": {
+                    "root": {
+                      "Var": "invoice"
+                    },
+                    "field": "status"
+                  }
+                },
+                "op": "Eq",
+                "right": {
+                  "Var": "Void"
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "CancelOrder",
+              "part": "ensures:when",
+              "span": {
+                "start": 2866,
+                "end": 2917
+              }
+            }
+          }
+        },
+        {
+          "Always": {
+            "expr": {
+              "Forall": {
+                "binding": "i",
+                "ty": "Invoice",
+                "body": {
+                  "Implies": [
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "order"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "order"
+                        }
+                      }
+                    },
+                    {
+                      "Compare": {
+                        "left": {
+                          "FieldAccess": {
+                            "root": {
+                              "Var": "i"
+                            },
+                            "field": "status"
+                          }
+                        },
+                        "op": "Eq",
+                        "right": {
+                          "Var": "Void"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "trace": {
+              "module": "Orders",
+              "item": "CancelOrder",
+              "part": "ensures",
+              "span": {
+                "start": 2917,
+                "end": 2977
+              }
+            }
+          }
+        }
+      ],
+      "properties": [
+        {
+          "key": "requires_role",
+          "value": {
+            "String": "customer"
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CancelOrder",
+            "part": "property:requires_role",
+            "span": {
+              "start": 2999,
+              "end": 3024
+            }
+          }
+        },
+        {
+          "key": "atomic",
+          "value": {
+            "Bool": true
+          },
+          "trace": {
+            "module": "Orders",
+            "item": "CancelOrder",
+            "part": "property:atomic",
+            "span": {
+              "start": 3029,
+              "end": 3041
+            }
+          }
+        }
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "CancelOrder",
+        "part": "action",
+        "span": {
+          "start": 2490,
+          "end": 3047
+        }
+      }
+    }
+  ],
+  "invariants": [
+    {
+      "name": "InvoiceHasOrder",
+      "expr": {
+        "Forall": {
+          "binding": "i",
+          "ty": "Invoice",
+          "body": {
+            "Exists": {
+              "binding": "o",
+              "ty": "Order",
+              "body": {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "Var": "o"
+                      },
+                      "field": "id"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "FieldAccess": {
+                      "root": {
+                        "FieldAccess": {
+                          "root": {
+                            "Var": "i"
+                          },
+                          "field": "order"
+                        }
+                      },
+                      "field": "id"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "trace": {
+        "module": "Orders",
+        "item": "InvoiceHasOrder",
+        "part": "invariant",
+        "span": {
+          "start": 3049,
+          "end": 3188
+        }
+      }
+    },
+    {
+      "name": "OneActiveInvoice",
+      "expr": {
+        "Forall": {
+          "binding": "a",
+          "ty": "Invoice",
+          "body": {
+            "Forall": {
+              "binding": "b",
+              "ty": "Invoice",
+              "body": {
+                "Implies": [
+                  {
+                    "And": [
+                      {
+                        "And": [
+                          {
+                            "Compare": {
+                              "left": {
+                                "FieldAccess": {
+                                  "root": {
+                                    "Var": "a"
+                                  },
+                                  "field": "order"
+                                }
+                              },
+                              "op": "Eq",
+                              "right": {
+                                "FieldAccess": {
+                                  "root": {
+                                    "Var": "b"
+                                  },
+                                  "field": "order"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "Compare": {
+                              "left": {
+                                "FieldAccess": {
+                                  "root": {
+                                    "Var": "a"
+                                  },
+                                  "field": "status"
+                                }
+                              },
+                              "op": "Ne",
+                              "right": {
+                                "Var": "Void"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "Compare": {
+                          "left": {
+                            "FieldAccess": {
+                              "root": {
+                                "Var": "b"
+                              },
+                              "field": "status"
+                            }
+                          },
+                          "op": "Ne",
+                          "right": {
+                            "Var": "Void"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "Compare": {
+                      "left": {
+                        "FieldAccess": {
+                          "root": {
+                            "Var": "a"
+                          },
+                          "field": "id"
+                        }
+                      },
+                      "op": "Eq",
+                      "right": {
+                        "FieldAccess": {
+                          "root": {
+                            "Var": "b"
+                          },
+                          "field": "id"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "trace": {
+        "module": "Orders",
+        "item": "OneActiveInvoice",
+        "part": "invariant",
+        "span": {
+          "start": 3190,
+          "end": 3394
+        }
+      }
+    },
+    {
+      "name": "FulfilledIsPaid",
+      "expr": {
+        "Forall": {
+          "binding": "o",
+          "ty": "Order",
+          "body": {
+            "Implies": [
+              {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "Var": "o"
+                      },
+                      "field": "status"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "Var": "Fulfilled"
+                  }
+                }
+              },
+              {
+                "Exists": {
+                  "binding": "i",
+                  "ty": "Invoice",
+                  "body": {
+                    "And": [
+                      {
+                        "Compare": {
+                          "left": {
+                            "FieldAccess": {
+                              "root": {
+                                "Var": "i"
+                              },
+                              "field": "order"
+                            }
+                          },
+                          "op": "Eq",
+                          "right": {
+                            "Var": "o"
+                          }
+                        }
+                      },
+                      {
+                        "Compare": {
+                          "left": {
+                            "FieldAccess": {
+                              "root": {
+                                "Var": "i"
+                              },
+                              "field": "status"
+                            }
+                          },
+                          "op": "Eq",
+                          "right": {
+                            "Var": "Paid"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "trace": {
+        "module": "Orders",
+        "item": "FulfilledIsPaid",
+        "part": "invariant",
+        "span": {
+          "start": 3396,
+          "end": 3575
+        }
+      }
+    },
+    {
+      "name": "CancelledHasNoLiveInvoice",
+      "expr": {
+        "Forall": {
+          "binding": "o",
+          "ty": "Order",
+          "body": {
+            "Implies": [
+              {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "Var": "o"
+                      },
+                      "field": "status"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "Var": "Cancelled"
+                  }
+                }
+              },
+              {
+                "Not": {
+                  "Exists": {
+                    "binding": "i",
+                    "ty": "Invoice",
+                    "body": {
+                      "And": [
+                        {
+                          "Compare": {
+                            "left": {
+                              "FieldAccess": {
+                                "root": {
+                                  "Var": "i"
+                                },
+                                "field": "order"
+                              }
+                            },
+                            "op": "Eq",
+                            "right": {
+                              "Var": "o"
+                            }
+                          }
+                        },
+                        {
+                          "Compare": {
+                            "left": {
+                              "FieldAccess": {
+                                "root": {
+                                  "Var": "i"
+                                },
+                                "field": "status"
+                              }
+                            },
+                            "op": "Ne",
+                            "right": {
+                              "Var": "Void"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "trace": {
+        "module": "Orders",
+        "item": "CancelledHasNoLiveInvoice",
+        "part": "invariant",
+        "span": {
+          "start": 3577,
+          "end": 3778
+        }
+      }
+    },
+    {
+      "name": "NoticesAreTruthful",
+      "expr": {
+        "Forall": {
+          "binding": "n",
+          "ty": "Notice",
+          "body": {
+            "Implies": [
+              {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "Var": "n"
+                      },
+                      "field": "kind"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "Var": "Receipt"
+                  }
+                }
+              },
+              {
+                "Compare": {
+                  "left": {
+                    "FieldAccess": {
+                      "root": {
+                        "FieldAccess": {
+                          "root": {
+                            "Var": "n"
+                          },
+                          "field": "invoice"
+                        }
+                      },
+                      "field": "status"
+                    }
+                  },
+                  "op": "Eq",
+                  "right": {
+                    "Var": "Paid"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "trace": {
+        "module": "Orders",
+        "item": "NoticesAreTruthful",
+        "part": "invariant",
+        "span": {
+          "start": 3780,
+          "end": 3928
+        }
+      }
+    }
+  ],
+  "edge_guards": [
+    {
+      "condition": {
+        "Compare": {
+          "left": {
+            "FieldAccess": {
+              "root": {
+                "Var": "order"
+              },
+              "field": "status"
+            }
+          },
+          "op": "Eq",
+          "right": {
+            "Var": "Fulfilled"
+          }
+        }
+      },
+      "action": "reject",
+      "args": [
+        [
+          "",
+          {
+            "Literal": {
+              "String": "A fulfilled order cannot be cancelled"
+            }
+          }
+        ]
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "edge_cases",
+        "part": "when:reject",
+        "span": {
+          "start": 3945,
+          "end": 4026
+        }
+      }
+    },
+    {
+      "condition": {
+        "Compare": {
+          "left": {
+            "FieldAccess": {
+              "root": {
+                "Var": "order"
+              },
+              "field": "status"
+            }
+          },
+          "op": "Eq",
+          "right": {
+            "Var": "Cancelled"
+          }
+        }
+      },
+      "action": "reject",
+      "args": [
+        [
+          "",
+          {
+            "Literal": {
+              "String": "The order is already cancelled"
+            }
+          }
+        ]
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "edge_cases",
+        "part": "when:reject",
+        "span": {
+          "start": 4029,
+          "end": 4103
+        }
+      }
+    },
+    {
+      "condition": {
+        "Compare": {
+          "left": {
+            "FieldAccess": {
+              "root": {
+                "Var": "invoice"
+              },
+              "field": "status"
+            }
+          },
+          "op": "Eq",
+          "right": {
+            "Var": "Paid"
+          }
+        }
+      },
+      "action": "reject",
+      "args": [
+        [
+          "",
+          {
+            "Literal": {
+              "String": "A paid invoice cannot be paid or voided again"
+            }
+          }
+        ]
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "edge_cases",
+        "part": "when:reject",
+        "span": {
+          "start": 4106,
+          "end": 4192
+        }
+      }
+    },
+    {
+      "condition": {
+        "Compare": {
+          "left": {
+            "FieldAccess": {
+              "root": {
+                "Var": "invoice"
+              },
+              "field": "status"
+            }
+          },
+          "op": "Eq",
+          "right": {
+            "Var": "Void"
+          }
+        }
+      },
+      "action": "reject",
+      "args": [
+        [
+          "",
+          {
+            "Literal": {
+              "String": "A void invoice cannot be paid"
+            }
+          }
+        ]
+      ],
+      "trace": {
+        "module": "Orders",
+        "item": "edge_cases",
+        "part": "when:reject",
+        "span": {
+          "start": 4195,
+          "end": 4265
+        }
+      }
+    }
+  ]
+}

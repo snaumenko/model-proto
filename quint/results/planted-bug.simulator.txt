@@ -1,0 +1,34 @@
+An example execution:
+
+[State 0] { invoices: Map(), orders: Map(), outbox: Set() }
+
+[State 1] { invoices: Map(), orders: Map(1 -> Draft), outbox: Set() }
+
+[State 2]
+{ invoices: Map(), orders: Map(1 -> Draft, 2 -> Draft), outbox: Set() }
+
+[State 3]
+{ invoices: Map(), orders: Map(1 -> Draft, 2 -> Cancelled), outbox: Set() }
+
+[State 4]
+{ invoices: Map(), orders: Map(1 -> Confirmed, 2 -> Cancelled), outbox: Set() }
+
+[State 5]
+{
+  invoices: Map(2 -> { order: 1, status: Issued }),
+  orders: Map(1 -> Confirmed, 2 -> Cancelled),
+  outbox: Set({ invoice: 2, kind: InvoiceEmail })
+}
+
+[State 6]
+{
+  invoices: Map(2 -> { order: 1, status: Issued }),
+  orders: Map(1 -> Cancelled, 2 -> Cancelled),
+  outbox: Set({ invoice: 2, kind: InvoiceEmail })
+}
+
+[violation] Found an issue (34ms at 29 traces/second).
+  ❌ cancelledHasNoLiveInvoice
+Use --verbosity=3 to show executions.
+Use --seed=0x16f6bc70152fbd --backend=typescript to reproduce.
+error: Invariant violated

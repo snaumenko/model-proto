@@ -1,0 +1,264 @@
+module Orders
+
+--- Orders and their invoices: two entities, their lifecycles,
+--- who may act, the side effects, and the invariants that tie them together.
+
+// Lifecycle of an order.
+state OrderStatus {
+  Draft -> Confirmed -> Fulfilled
+  Draft -> Cancelled
+  Confirmed -> Cancelled
+}
+
+// Lifecycle of an invoice.
+state InvoiceStatus {
+  Issued -> Paid
+  Issued -> Void
+}
+
+entity Order {
+  id: UUID
+  status: OrderStatus
+}
+
+entity Invoice {
+  id: UUID
+  order: Order
+  status: InvoiceStatus
+}
+
+--- Side effect: a message sent to the customer.
+entity Notice {
+  kind: InvoiceEmail | Receipt
+  invoice: Invoice
+}
+
+action CreateOrder {
+  --- The customer creates an order in Draft.
+  id: UUID
+
+  requires {
+    !(exists o: Order => o.id == id)
+  }
+
+  ensures {
+    exists o: Order => o.id == id && o.status == Draft
+  }
+
+  properties {
+    requires_role: "customer"
+  }
+}
+
+action ConfirmOrder {
+  --- The customer confirms a draft order.
+  order: Order
+
+  requires {
+    order.status == Draft
+  }
+
+  ensures {
+    order.status == Confirmed
+  }
+
+  properties {
+    requires_role: "customer"
+  }
+}
+
+action IssueInvoice {
+  --- The system issues an invoice for a confirmed order with no active invoice.
+  --- Side effect: invoice email.
+  order: Order
+
+  requires {
+    order.status == Confirmed
+    !(exists i: Invoice => i.order == order && i.status != Void)
+  }
+
+  ensures {
+    exists i: Invoice => i.order == order && i.status == Issued
+    exists n: Notice => n.kind == InvoiceEmail && n.invoice.order == order
+  }
+
+  properties {
+    requires_role: "system"
+    audit_logged: true
+  }
+}
+
+action VoidInvoice {
+  --- Staff void an unpaid invoice; the system may then reissue.
+  invoice: Invoice
+
+  requires {
+    invoice.status == Issued
+  }
+
+  ensures {
+    invoice.status == Void
+  }
+
+  properties {
+    requires_role: "staff"
+  }
+}
+
+action PayInvoice {
+  --- The customer pays an issued invoice. Side effect: receipt.
+  invoice: Invoice
+
+  requires {
+    invoice.status == Issued
+  }
+
+  ensures {
+    invoice.status == Paid
+    exists n: Notice => n.kind == Receipt && n.invoice == invoice
+  }
+
+  properties {
+    requires_role: "customer"
+    idempotent: true
+    audit_logged: true
+  }
+}
+
+action FulfilOrder {
+  --- Staff fulfil a confirmed order once it is paid.
+  order: Order
+
+  requires {
+    order.status == Confirmed
+    exists i: Invoice => i.order == order && i.status == Paid
+  }
+
+  ensures {
+    order.status == Fulfilled
+  }
+
+  properties {
+    requires_role: "staff"
+  }
+}
+
+action CancelOrder {
+  --- The customer cancels before payment. Any issued invoice is voided.
+  --- `invoice` is the order's issued invoice, if it has one.
+  order: Order
+  invoice: Invoice?
+
+  requires {
+    order.status == Draft || order.status == Confirmed
+    !(exists i: Invoice => i.order == order && i.status == Paid)
+  }
+
+  ensures {
+    order.status == Cancelled
+    when invoice != null => invoice.status == Void
+    forall i: Invoice => i.order == order => i.status == Void
+  }
+
+  properties {
+    requires_role: "customer"
+    atomic: true
+  }
+}
+
+invariant InvoiceHasOrder {
+  --- Every invoice refers to an existing order.
+  forall i: Invoice => exists o: Order => o.id == i.order.id
+}
+
+invariant OneActiveInvoice {
+  --- An order has at most one non-void invoice.
+  forall a: Invoice => forall b: Invoice =>
+    (a.order == b.order && a.status != Void && b.status != Void) => a.id == b.id
+}
+
+invariant FulfilledIsPaid {
+  --- A fulfilled order has a paid invoice.
+  forall o: Order => o.status == Fulfilled =>
+    (exists i: Invoice => i.order == o && i.status == Paid)
+}
+
+invariant CancelledHasNoLiveInvoice {
+  --- A cancelled order has no issued or paid invoice.
+  forall o: Order => o.status == Cancelled =>
+    !(exists i: Invoice => i.order == o && i.status != Void)
+}
+
+invariant NoticesAreTruthful {
+  --- A receipt exists only for a paid invoice.
+  forall n: Notice => n.kind == Receipt => n.invoice.status == Paid
+}
+
+edge_cases {
+  when order.status == Fulfilled => reject("A fulfilled order cannot be cancelled")
+  when order.status == Cancelled => reject("The order is already cancelled")
+  when invoice.status == Paid => reject("A paid invoice cannot be paid or voided again")
+  when invoice.status == Void => reject("A void invoice cannot be paid")
+}
+
+test "confirm a draft order" {
+  given {
+    order = Order { id: "o-1", status: Draft }
+  }
+  when ConfirmOrder { order: order }
+  then {
+    order.status == Confirmed
+  }
+}
+
+test "pay an issued invoice" {
+  given {
+    order = Order { id: "o-1", status: Confirmed }
+    invoice = Invoice { id: "i-1", order: order, status: Issued }
+  }
+  when PayInvoice { invoice: invoice }
+  then {
+    invoice.status == Paid
+  }
+}
+
+test "cannot fulfil an unpaid order" {
+  given {
+    order = Order { id: "o-1", status: Confirmed }
+    invoice = Invoice { id: "i-1", order: order, status: Issued }
+  }
+  when FulfilOrder { order: order }
+  then fails precondition
+}
+
+test "cannot cancel a paid order" {
+  given {
+    order = Order { id: "o-1", status: Confirmed }
+    invoice = Invoice { id: "i-1", order: order, status: Paid }
+  }
+  when CancelOrder { order: order, invoice: invoice }
+  then fails precondition
+}
+
+test "cancelling voids the issued invoice" {
+  given {
+    order = Order { id: "o-1", status: Confirmed }
+    invoice = Invoice { id: "i-1", order: order, status: Issued }
+  }
+  when CancelOrder { order: order, invoice: invoice }
+  then {
+    order.status == Cancelled
+    invoice.status == Void
+  }
+}
+
+test "cancelling keeps the invariants" {
+  given {
+    order = Order { id: "o-1", status: Confirmed }
+    invoice = Invoice { id: "i-1", order: order, status: Issued }
+  }
+  when CancelOrder { order: order, invoice: invoice }
+  then {
+    order.status == Cancelled
+  }
+}

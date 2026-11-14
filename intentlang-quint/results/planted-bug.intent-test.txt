@@ -1,0 +1,9 @@
+  PASS  confirm a draft order
+  PASS  pay an issued invoice
+  PASS  cannot fulfil an unpaid order
+  PASS  cannot cancel a paid order
+  FAIL  cancelling voids the issued invoice
+        assertion failed: invoice.status == Void
+  PASS  cancelling keeps the invariants
+
+5 passed, 1 failed (6 total)

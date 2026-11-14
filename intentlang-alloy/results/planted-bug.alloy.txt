@@ -1,0 +1,32 @@
+---Trace---
+------State 0-------
+this/Order<:status={}
+this/Invoice<:order={}
+this/Invoice<:istatus={}
+this/Emailed={}
+this/Receipted={}
+------State 1-------
+this/Order<:status={Order$1->Draft$0}
+this/Invoice<:order={}
+this/Invoice<:istatus={}
+this/Emailed={}
+this/Receipted={}
+------State 2-------
+this/Order<:status={Order$1->Confirmed$0}
+this/Invoice<:order={}
+this/Invoice<:istatus={}
+this/Emailed={}
+this/Receipted={}
+------State 3-------
+this/Order<:status={Order$1->Confirmed$0}
+this/Invoice<:order={Invoice$1->Order$1}
+this/Invoice<:istatus={Invoice$1->Issued$0}
+this/Emailed={Invoice$1}
+this/Receipted={}
+------State 4 (loop)-------
+this/Order<:status={Order$1->Cancelled$0}
+this/Invoice<:order={Invoice$1->Order$1}
+this/Invoice<:istatus={Invoice$1->Issued$0}
+this/Emailed={Invoice$1}
+this/Receipted={}
+

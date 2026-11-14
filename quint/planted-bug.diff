@@ -1,0 +1,17 @@
+1c1
+< // Quint is the only spec artifact.
+---
+> // PLANTED BUG variant: cancelOrder forgets to void the invoice.
+8c8
+< module orders {
+---
+> module orders_bug {
+126,131c126
+<     invoices' = invoices.keys().mapBy(i =>
+<       if (invoices.get(i).order == o and invoices.get(i).status == Issued)
+<         { ...invoices.get(i), status: Void }
+<       else
+<         invoices.get(i)
+<     ),
+---
+>     invoices' = invoices, // BUG: the issued invoice is no longer voided

@@ -1,0 +1,7 @@
+103,106c103
+<     ensures:
+<         order.status = cancelled
+<         for invoice in order.issued_invoices:
+<             invoice.status = void
+---
+>     ensures: order.status = cancelled

@@ -1,0 +1,17 @@
+{
+  "command": "analyse",
+  "diagnostics": [
+    {
+      "code": "allium.field.unused",
+      "location": {
+        "col": 5,
+        "file": "orders_bug.allium",
+        "line": 10
+      },
+      "message": "Field 'User.role' is declared but not referenced elsewhere.",
+      "severity": "info"
+    }
+  ],
+  "findings": [],
+  "spec_file": "orders_bug.allium"
+}

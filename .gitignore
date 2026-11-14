@@ -1,0 +1,5 @@
+node_modules/
+tools/
+quint/traces/
+intentlang-alloy/out*/
+_apalache-out/

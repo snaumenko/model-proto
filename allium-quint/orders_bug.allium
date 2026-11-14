@@ -1,0 +1,215 @@
+-- allium: 3
+-- Orders and their invoices: two entities, their lifecycles, who may act,
+-- the side effects, and the invariants that tie them together.
+
+------------------------------------------------------------
+-- Entities and Variants
+------------------------------------------------------------
+
+entity User {
+    role: customer | staff
+}
+
+entity Order {
+    customer: User
+    status: draft | confirmed | fulfilled | cancelled
+
+    -- Relationships
+    invoices: Invoice with order = this
+
+    -- Projections
+    issued_invoices: invoices where status = issued
+    paid_invoices: invoices where status = paid
+    active_invoices: invoices where status != void
+
+    -- Derived
+    is_paid: paid_invoices.count > 0
+    awaiting_invoice: status = confirmed and active_invoices.count = 0
+
+    transitions status {
+        draft -> confirmed
+        confirmed -> fulfilled
+        draft -> cancelled
+        confirmed -> cancelled
+        terminal: fulfilled, cancelled
+    }
+
+    -- An order has at most one non-void invoice.
+    invariant OneActiveInvoice {
+        active_invoices.count <= 1
+    }
+
+    -- A fulfilled order has a paid invoice.
+    invariant FulfilledIsPaid {
+        status = fulfilled implies is_paid
+    }
+
+    -- A cancelled order has no issued or paid invoice.
+    invariant CancelledHasNoLiveInvoice {
+        status = cancelled implies active_invoices.count = 0
+    }
+}
+
+-- "Every invoice refers to an existing order" needs no invariant here:
+-- `order: Order` is a required field, so an invoice cannot exist without one.
+entity Invoice {
+    order: Order
+    status: issued | paid | void
+    paid_at: Timestamp when status = paid
+
+    transitions status {
+        issued -> paid
+        issued -> void
+        terminal: paid, void
+    }
+}
+
+-- Side effect: a message sent to the customer.
+entity Notice {
+    invoice: Invoice
+    kind: invoice_email | receipt
+}
+
+------------------------------------------------------------
+-- Rules
+------------------------------------------------------------
+
+-- Customer ------------------------------------------------
+
+rule CustomerCreatesOrder {
+    when: CustomerCreatesOrder(customer)
+    ensures: Order.created(customer: customer, status: draft)
+}
+
+rule CustomerConfirmsOrder {
+    when: CustomerConfirmsOrder(customer, order)
+    requires: order.status = draft
+    ensures: order.status = confirmed
+}
+
+rule CustomerPaysInvoice {
+    when: CustomerPaysInvoice(customer, invoice)
+    requires: invoice.status = issued
+    ensures:
+        invoice.status = paid
+        invoice.paid_at = now
+        Notice.created(invoice: invoice, kind: receipt)
+}
+
+rule CustomerCancelsOrder {
+    when: CustomerCancelsOrder(customer, order)
+    requires: order.status in {draft, confirmed}
+    requires: not order.is_paid
+    ensures: order.status = cancelled
+}
+
+-- System --------------------------------------------------
+-- No one calls this: the system reacts whenever a confirmed order
+-- has no active invoice (on confirmation, or after staff void one).
+
+rule SystemIssuesInvoice {
+    when: order: Order.awaiting_invoice
+    ensures: Invoice.created(order: order, status: issued)
+
+    @guidance
+        -- Issue asynchronously; the customer-facing confirmation
+        -- must not wait for the invoice.
+}
+
+-- Side effect, chained from the creation of any invoice.
+rule InvoiceEmailOnIssue {
+    when: invoice: Invoice.created
+    ensures: Notice.created(invoice: invoice, kind: invoice_email)
+}
+
+-- Staff ---------------------------------------------------
+
+rule StaffVoidsInvoice {
+    when: StaffVoidsInvoice(staff, invoice)
+    requires: invoice.status = issued
+    ensures: invoice.status = void
+}
+
+rule StaffFulfilsOrder {
+    when: StaffFulfilsOrder(staff, order)
+    requires: order.status = confirmed
+    requires: order.is_paid
+    ensures: order.status = fulfilled
+}
+
+------------------------------------------------------------
+-- Invariants
+------------------------------------------------------------
+
+-- Side effects are truthful: a receipt exists only for a paid invoice.
+invariant ReceiptOnlyForPaidInvoice {
+    for notice in Notices:
+        notice.kind = receipt implies notice.invoice.status = paid
+}
+
+------------------------------------------------------------
+-- Actor Declarations
+------------------------------------------------------------
+
+actor Customer {
+    identified_by: User where role = customer
+}
+
+actor Staff {
+    identified_by: User where role = staff
+}
+
+------------------------------------------------------------
+-- Surfaces
+------------------------------------------------------------
+
+surface Storefront {
+    facing buyer: Customer
+
+    provides:
+        CustomerCreatesOrder(buyer)
+}
+
+surface CustomerOrder {
+    facing buyer: Customer
+    context order: Order where customer = buyer
+
+    exposes:
+        order.status
+        order.is_paid
+        for invoice in order.invoices:
+            invoice.status
+
+    provides:
+        CustomerConfirmsOrder(buyer, order) when order.status = draft
+        CustomerCancelsOrder(buyer, order)
+            when order.status in {draft, confirmed} and not order.is_paid
+        for invoice in order.issued_invoices:
+            CustomerPaysInvoice(buyer, invoice)
+
+    @guarantee OwnOrdersOnly
+        -- A customer sees and acts on their own orders only.
+}
+
+surface BackOffice {
+    facing operator: Staff
+    context order: Order
+
+    exposes:
+        order.status
+        order.customer
+        for invoice in order.invoices:
+            invoice.status
+
+    provides:
+        StaffFulfilsOrder(operator, order)
+            when order.status = confirmed and order.is_paid
+        for invoice in order.issued_invoices:
+            StaffVoidsInvoice(operator, invoice)
+}
+
+------------------------------------------------------------
+-- Open Questions
+------------------------------------------------------------
+
+open question "Refunds: can a paid order be cancelled, and what happens to the invoice?"

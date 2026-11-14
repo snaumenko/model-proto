@@ -1,0 +1,3 @@
+159,160d158
+<     when invoice != null => invoice.status == Void
+<     forall i: Invoice => i.order == order => i.status == Void

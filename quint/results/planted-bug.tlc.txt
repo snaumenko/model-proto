@@ -1,0 +1,26 @@
+Error: Invariant q_inv is violated.
+State 1: <Initial predicate>
+/\ outbox = {}
+/\ orders = <<>>
+/\ invoices = <<>>
+State 2: <createOrder(Customer,1)>
+/\ outbox = {}
+/\ orders = <<Draft>>
+/\ invoices = <<>>
+State 3: <confirmOrder(Customer,1)>
+/\ outbox = {}
+/\ orders = <<Confirmed>>
+/\ invoices = <<>>
+State 4: <createOrder(Customer,2)>
+/\ outbox = {}
+/\ orders = <<Confirmed, Draft>>
+/\ invoices = <<>>
+State 5: <issueInvoice(System,1,1)>
+/\ outbox = {[kind |-> InvoiceEmail, invoice |-> 1]}
+/\ orders = <<Confirmed, Draft>>
+/\ invoices = <<[order |-> 1, status |-> Issued]>>
+State 6: <cancelOrder(Customer,1)>
+/\ outbox = {[kind |-> InvoiceEmail, invoice |-> 1]}
+/\ orders = <<Cancelled, Draft>>
+/\ invoices = <<[order |-> 1, status |-> Issued]>>
+[violation] Found an issue (815ms).

@@ -1,0 +1,17 @@
+{
+  "name": "model-proto",
+  "private": true,
+  "type": "module",
+  "description": "Order + Invoice specified four ways: Quint, IntentLang + Alloy, IntentLang + Quint, Allium + Quint",
+  "scripts": {
+    "check:quint": "bash quint/check.sh",
+    "check:intentlang-alloy": "bash intentlang-alloy/check.sh",
+    "check:intentlang-quint": "bash intentlang-quint/check.sh",
+    "check:allium-quint": "bash allium-quint/check.sh",
+    "check": "npm run check:quint && npm run check:intentlang-alloy && npm run check:intentlang-quint && npm run check:allium-quint"
+  },
+  "devDependencies": {
+    "@informalsystems/quint": "0.33.1",
+    "fast-check": "4.10.2"
+  }
+}
